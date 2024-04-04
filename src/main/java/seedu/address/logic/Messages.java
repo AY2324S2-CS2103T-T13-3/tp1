@@ -18,6 +18,7 @@ public class Messages {
     public static final String MESSAGE_PERSONS_LISTED_OVERVIEW = "%1$d persons listed!";
     public static final String MESSAGE_DUPLICATE_FIELDS =
                 "Multiple values specified for the following single-valued field(s): ";
+    public static final String MESSAGE_NO_PREFIXES_FOUND = "Command has no valid prefixes \n%1$s";
 
     /**
      * Returns an error message indicating the duplicate prefixes.
@@ -43,6 +44,8 @@ public class Messages {
                 .append(person.getEmail())
                 .append("; Address: ")
                 .append(person.getAddress())
+                .append("; Relationship: ")
+                .append(person.getRelationship())
                 .append("; Tags: ");
         person.getTags().forEach(builder::append);
         return builder.toString();

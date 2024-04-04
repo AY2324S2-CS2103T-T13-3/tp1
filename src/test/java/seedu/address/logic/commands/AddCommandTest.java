@@ -10,6 +10,7 @@ import static seedu.address.testutil.TypicalPersons.ALICE;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.function.Predicate;
 
 import org.junit.jupiter.api.Test;
@@ -22,6 +23,8 @@ import seedu.address.model.AddressBook;
 import seedu.address.model.Model;
 import seedu.address.model.ReadOnlyAddressBook;
 import seedu.address.model.ReadOnlyUserPrefs;
+import seedu.address.model.person.ClientStatusSummaryValues;
+import seedu.address.model.person.Meeting;
 import seedu.address.model.person.Person;
 import seedu.address.testutil.PersonBuilder;
 
@@ -157,6 +160,45 @@ public class AddCommandTest {
         public void updateFilteredPersonList(Predicate<Person> predicate) {
             throw new AssertionError("This method should not be called.");
         }
+
+        @Override
+        public ClientStatusSummaryValues getClientStatusSummaryValues() {
+            throw new AssertionError("This method should not be called.");
+        }
+
+        @Override
+        public boolean canUndoAddressBook() {
+            throw new AssertionError("This method should not be called.");
+        }
+
+        @Override
+        public boolean canRedoAddressBook() {
+            throw new AssertionError("This method should not be called.");
+        }
+
+        @Override
+        public void undoAddressBook() {
+            throw new AssertionError("This method should not be called.");
+        }
+
+        @Override
+        public void redoAddressBook() {
+            throw new AssertionError("This method should not be called.");
+        }
+
+        @Override
+        public void commitAddressBook() {
+            throw new AssertionError("This method should not be called.");
+        }
+
+        @Override
+        public boolean hasMeetingOverlap(Meeting meeting) {
+            throw new AssertionError("This method should not be called.");
+        }
+        @Override
+        public void removeExpiredMeetings() {
+            throw new AssertionError("This method should not be called.");
+        }
     }
 
     /**
@@ -188,7 +230,10 @@ public class AddCommandTest {
             requireNonNull(person);
             return personsAdded.stream().anyMatch(person::isSamePerson);
         }
+        @Override
+        public void commitAddressBook() {
 
+        }
         @Override
         public void addPerson(Person person) {
             requireNonNull(person);
@@ -200,5 +245,27 @@ public class AddCommandTest {
             return new AddressBook();
         }
     }
+
+    private class ModelStubWithMeetingOverlap extends ModelStub {
+        private final List<Meeting> meetings = new ArrayList<>();
+
+        @Override
+        public void addPerson(Person person) {
+            requireNonNull(person);
+            // Add all meetings of the person to the list
+            meetings.addAll(person.getMeetings());
+        }
+
+        @Override
+        public boolean hasMeetingOverlap(Meeting meeting) {
+            for (Meeting existingMeeting : meetings) {
+                if (meeting.overlapsWith(existingMeeting)) {
+                    return true;
+                }
+            }
+            return false;
+        }
+    }
+
 
 }

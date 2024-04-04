@@ -97,6 +97,24 @@ public class UniquePersonList implements Iterable<Person> {
         internalList.setAll(persons);
     }
 
+    public ClientStatusSummaryValues getClientStatusSummaryValues() {
+        int numClients = internalList.stream()
+                .map(e -> e.isClient() ? 1 : 0)
+                .reduce(0, Integer::sum);
+        int numStart = internalList.stream()
+                .map(e -> e.getClientStatus().getStatus() == 1 ? 1 : 0)
+                .reduce(0, Integer::sum);
+        int numMid = internalList.stream()
+                .map(e -> e.getClientStatus().getStatus() == 2 ? 1 : 0)
+                .reduce(0, Integer::sum);
+        int numEnd = internalList.stream()
+                .map(e -> e.getClientStatus().getStatus() == 3 ? 1 : 0)
+                .reduce(0, Integer::sum);
+        return new ClientStatusSummaryValues(numClients, numStart, numMid, numEnd);
+    }
+
+
+
     /**
      * Returns the backing list as an unmodifiable {@code ObservableList}.
      */

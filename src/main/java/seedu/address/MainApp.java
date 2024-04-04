@@ -3,9 +3,12 @@ package seedu.address;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Optional;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.logging.Logger;
 
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.stage.Stage;
 import seedu.address.commons.core.Config;
 import seedu.address.commons.core.LogsCenter;
@@ -22,8 +25,8 @@ import seedu.address.model.ReadOnlyAddressBook;
 import seedu.address.model.ReadOnlyUserPrefs;
 import seedu.address.model.UserPrefs;
 import seedu.address.model.util.SampleDataUtil;
-import seedu.address.storage.AddressBookStorage;
-import seedu.address.storage.JsonAddressBookStorage;
+import seedu.address.storage.InsuraConnectBookStorage;
+import seedu.address.storage.JsonInsuraConnectBookStorage;
 import seedu.address.storage.JsonUserPrefsStorage;
 import seedu.address.storage.Storage;
 import seedu.address.storage.StorageManager;
@@ -36,9 +39,10 @@ import seedu.address.ui.UiManager;
  */
 public class MainApp extends Application {
 
-    public static final Version VERSION = new Version(0, 2, 2, true);
+    public static final Version VERSION = new Version(1, 2, 1, true);
 
     private static final Logger logger = LogsCenter.getLogger(MainApp.class);
+
 
     protected Ui ui;
     protected Logic logic;
@@ -46,10 +50,12 @@ public class MainApp extends Application {
     protected Model model;
     protected Config config;
 
+    private Timer timer;
     @Override
     public void init() throws Exception {
         logger.info("=============================[ Initializing AddressBook ]===========================");
         super.init();
+
 
         AppParameters appParameters = AppParameters.parse(getParameters());
         config = initConfig(appParameters.getConfigPath());
@@ -57,8 +63,9 @@ public class MainApp extends Application {
 
         UserPrefsStorage userPrefsStorage = new JsonUserPrefsStorage(config.getUserPrefsFilePath());
         UserPrefs userPrefs = initPrefs(userPrefsStorage);
-        AddressBookStorage addressBookStorage = new JsonAddressBookStorage(userPrefs.getAddressBookFilePath());
-        storage = new StorageManager(addressBookStorage, userPrefsStorage);
+        InsuraConnectBookStorage insuraConnectBookStorage =
+                new JsonInsuraConnectBookStorage(userPrefs.getAddressBookFilePath());
+        storage = new StorageManager(insuraConnectBookStorage, userPrefsStorage);
 
         model = initModelManager(storage, userPrefs);
 
@@ -171,11 +178,36 @@ public class MainApp extends Application {
     @Override
     public void start(Stage primaryStage) {
         logger.info("Starting AddressBook " + MainApp.VERSION);
+        setupMeetingExpiryCheck();
+
         ui.start(primaryStage);
+    }
+
+    /**
+     * Sets up a scheduled task to regularly check for and remove expired meetings.
+     */
+    private void setupMeetingExpiryCheck() {
+        timer = new Timer();
+        timer.scheduleAtFixedRate(new TimerTask() {
+            @Override
+            public void run() {
+                // Remove expired meetings and update the UI
+                Platform.runLater(() -> {
+                    model.removeExpiredMeetings();
+                    // Assuming you have a method to update the UI
+                });
+            }
+        }, 0, 60000); // Check every minute (60000 milliseconds)
     }
 
     @Override
     public void stop() {
+
+        // Cancel the scheduled task when the application stops
+        if (timer != null) {
+            timer.cancel();
+        }
+
         logger.info("============================ [ Stopping Address Book ] =============================");
         try {
             storage.saveUserPrefs(model.getUserPrefs());

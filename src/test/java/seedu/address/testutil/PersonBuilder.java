@@ -1,13 +1,19 @@
 package seedu.address.testutil;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import seedu.address.model.person.Address;
+import seedu.address.model.person.ClientStatus;
 import seedu.address.model.person.Email;
+import seedu.address.model.person.Meeting;
 import seedu.address.model.person.Name;
 import seedu.address.model.person.Person;
 import seedu.address.model.person.Phone;
+import seedu.address.model.person.Policy;
+import seedu.address.model.person.Relationship;
 import seedu.address.model.tag.Tag;
 import seedu.address.model.util.SampleDataUtil;
 
@@ -21,11 +27,19 @@ public class PersonBuilder {
     public static final String DEFAULT_EMAIL = "amy@gmail.com";
     public static final String DEFAULT_ADDRESS = "123, Jurong West Ave 6, #08-111";
 
+    public static final String DEFAULT_RELATIONSHIP = "client";
+
     private Name name;
     private Phone phone;
     private Email email;
     private Address address;
+    private List<Policy> policies;
+    private Relationship relationship;
+    private ClientStatus clientStatus;
     private Set<Tag> tags;
+
+    private List<Meeting> meetings;
+
 
     /**
      * Creates a {@code PersonBuilder} with the default details.
@@ -35,7 +49,11 @@ public class PersonBuilder {
         phone = new Phone(DEFAULT_PHONE);
         email = new Email(DEFAULT_EMAIL);
         address = new Address(DEFAULT_ADDRESS);
+        policies = new ArrayList<>();
+        clientStatus = ClientStatus.initClientStatus();
+        relationship = new Relationship(DEFAULT_RELATIONSHIP);
         tags = new HashSet<>();
+        meetings = new ArrayList<>();
     }
 
     /**
@@ -46,7 +64,11 @@ public class PersonBuilder {
         phone = personToCopy.getPhone();
         email = personToCopy.getEmail();
         address = personToCopy.getAddress();
+        policies = new ArrayList<>(personToCopy.getPolicies());
+        relationship = personToCopy.getRelationship();
+        clientStatus = personToCopy.getClientStatus();
         tags = new HashSet<>(personToCopy.getTags());
+        meetings = new ArrayList<>(personToCopy.getMeetings());
     }
 
     /**
@@ -89,8 +111,47 @@ public class PersonBuilder {
         return this;
     }
 
+    /**
+     * Adds a {@code Policy} to the {@code Person} that we are building.
+     */
+    public PersonBuilder withPolicy(Policy policy) {
+        this.policies.add(policy);
+        return this;
+    }
+
+    /**
+     * Sets the {@code Relationship} of the {@code Person} that we are building.
+     */
+    public PersonBuilder withRelationship(String relationship) {
+        this.relationship = new Relationship(relationship);
+        return this;
+    }
+
+    /**
+     * Sets the {@code ClientStatus} of the {@code Person} that we are building.
+     */
+    public PersonBuilder withClientStatus(String clientStatus) {
+        this.clientStatus = new ClientStatus(Integer.parseInt(clientStatus));
+        return this;
+    }
+
+    /**
+     * Adds a {@code Meeting} to the {@code Person} that we are building.
+     */
+    public PersonBuilder withMeeting(Meeting meeting) {
+        this.meetings.add(meeting);
+        return this;
+    }
+
+    /**
+     * Builds and returns a new Person object with the specified details.
+     *
+     * @return A new Person object with the specified details.
+     */
     public Person build() {
-        return new Person(name, phone, email, address, tags);
+        Person p = new Person(name, phone, email, address, relationship, policies, clientStatus, tags, meetings);
+
+        return p;
     }
 
 }

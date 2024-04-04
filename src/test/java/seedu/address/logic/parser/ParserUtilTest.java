@@ -3,9 +3,16 @@ package seedu.address.logic.parser;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static seedu.address.logic.parser.ParserUtil.MESSAGE_INVALID_INDEX;
+import static seedu.address.logic.parser.ParserUtil.checkIfTimeHasPassedOnSameDayAsCurrent;
+import static seedu.address.logic.parser.ParserUtil.parseLocalDateTime;
 import static seedu.address.testutil.Assert.assertThrows;
 import static seedu.address.testutil.TypicalIndexes.INDEX_FIRST_PERSON;
 
+import java.time.DayOfWeek;
+import java.time.Duration;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -18,6 +25,7 @@ import seedu.address.model.person.Address;
 import seedu.address.model.person.Email;
 import seedu.address.model.person.Name;
 import seedu.address.model.person.Phone;
+import seedu.address.model.person.Relationship;
 import seedu.address.model.tag.Tag;
 
 public class ParserUtilTest {
@@ -193,4 +201,160 @@ public class ParserUtilTest {
 
         assertEquals(expectedTagSet, actualTagSet);
     }
+
+    @Test
+    public void parseDate_null_throwsNullPointerException() {
+        assertThrows(NullPointerException.class, () -> ParserUtil.parseDate(null));
+    }
+
+    @Test
+    public void parseDate_invalidValue_throwsParseException() {
+        assertThrows(ParseException.class, () -> ParserUtil.parseDate("2025-02-41"));
+        assertThrows(ParseException.class, () -> ParserUtil.parseDate("not a date"));
+    }
+
+    @Test
+    public void parseDate_validValue_returnsLocalDate() throws Exception {
+        LocalDate expectedDate = LocalDate.of(2021, 1, 1);
+        assertEquals(expectedDate, ParserUtil.parseDate("2021-01-01"));
+    }
+
+    @Test
+    public void parseTime_null_throwsNullPointerException() {
+        assertThrows(NullPointerException.class, () -> ParserUtil.parseTime(null));
+    }
+
+    @Test
+    public void parseTime_invalidValue_throwsParseException() {
+        assertThrows(ParseException.class, () -> ParserUtil.parseTime("25:00"));
+        assertThrows(ParseException.class, () -> ParserUtil.parseTime("not a time"));
+    }
+
+    @Test
+    public void parseTime_validValue_returnsLocalTime() throws Exception {
+        LocalTime expectedTime = LocalTime.of(14, 30);
+        assertEquals(expectedTime, ParserUtil.parseTime("14:30"));
+    }
+
+    @Test
+    public void parseDuration_null_throwsNullPointerException() {
+        assertThrows(NullPointerException.class, () -> ParserUtil.parseDuration(null));
+    }
+
+    @Test
+    public void parseDuration_invalidValue_throwsParseException() {
+        assertThrows(ParseException.class, () -> ParserUtil.parseDuration("not a number"));
+        assertThrows(ParseException.class, () -> ParserUtil.parseDuration("-1"));
+    }
+
+    @Test
+    public void parseDuration_validValue_returnsDuration() throws Exception {
+        Duration expectedDuration = Duration.ofMinutes(90);
+        assertEquals(expectedDuration, ParserUtil.parseDuration("90"));
+    }
+
+    @Test
+    public void parseDate_emptyString_throwsParseException() {
+        assertThrows(ParseException.class, () -> ParserUtil.parseDate(""));
+    }
+
+    @Test
+    public void parseDate_validValueWithWhitespace_returnsLocalDate() throws Exception {
+        LocalDate expectedDate = LocalDate.of(2021, 1, 1);
+        assertEquals(expectedDate, ParserUtil.parseDate(" 2021-01-01 "));
+    }
+
+    @Test
+    public void parseTime_emptyString_throwsParseException() {
+        assertThrows(ParseException.class, () -> ParserUtil.parseTime(""));
+    }
+
+    @Test
+    public void parseTime_validValueWithWhitespace_returnsLocalTime() throws Exception {
+        LocalTime expectedTime = LocalTime.of(14, 30);
+        assertEquals(expectedTime, ParserUtil.parseTime(" 14:30 "));
+    }
+
+    @Test
+    public void parseDuration_emptyString_throwsParseException() {
+        assertThrows(ParseException.class, () -> ParserUtil.parseDuration(""));
+    }
+
+    @Test
+    public void parseDuration_validValueWithWhitespace_returnsDuration() throws Exception {
+        Duration expectedDuration = Duration.ofMinutes(90);
+        assertEquals(expectedDuration, ParserUtil.parseDuration(" 90 "));
+    }
+
+    @Test
+    public void parseRelationship_null_throwsNullPointerException() {
+        assertThrows(NullPointerException.class, () -> ParserUtil.parseRelationship(null));
+    }
+
+    @Test
+    public void parseRelationship_invalidValue_throwsParseException() {
+        assertThrows(ParseException.class, () -> ParserUtil.parseRelationship(" "));
+        assertThrows(ParseException.class, () -> ParserUtil.parseRelationship("123"));
+    }
+
+    @Test
+    public void parseRelationship_validValueWithoutWhitespace_returnsRelationship() throws Exception {
+        Relationship expectedRelationship = new Relationship("client");
+        assertEquals(expectedRelationship, ParserUtil.parseRelationship("client"));
+    }
+
+    @Test
+    public void parseRelationship_validValueWithWhitespace_returnsTrimmedRelationship() throws Exception {
+        String relationshipWithWhitespace = " client ";
+        Relationship expectedRelationship = new Relationship("client");
+        assertEquals(expectedRelationship, ParserUtil.parseRelationship(relationshipWithWhitespace));
+    }
+
+
+    @Test
+    public void parseLocalDateTime_validInput_success() throws Exception {
+        // Valid date and time
+        assertEquals(LocalDateTime.of(2023, 10, 25, 14, 30),
+                parseLocalDateTime("2023-10-25", "14:30"));
+
+        // Valid day of week with time
+        LocalDate nearestWednesday = LocalDate.now().with(java.time.temporal.TemporalAdjusters
+                        .nextOrSame(java.time.DayOfWeek.WEDNESDAY));
+        LocalDate nextWednesday = checkIfTimeHasPassedOnSameDayAsCurrent(LocalTime.parse("16:00"),
+                DayOfWeek.WEDNESDAY, nearestWednesday, nearestWednesday);
+        assertEquals(LocalDateTime.of(nextWednesday, LocalTime.of(16, 0)),
+                parseLocalDateTime("Wednesday", "16:00"));
+    }
+
+    //    @Test
+    //    public void parseLocalDateTime_invalidDate_throwsParseException() {
+    //        // Invalid date format
+    //        assertThrows(ParseException.class, () ->
+    //                ParserUtil.parseLocalDateTime("2023/10/25", "14:30"));
+    //
+    //        // Non-existent date
+    //        assertThrows(ParseException.class, () ->
+    //                ParserUtil.parseLocalDateTime("2023-02-30", "14:30"));
+    //    }
+    @Test
+    public void parseLocalDateTime_invalidTime_throwsParseException() {
+
+        // Non-existent time
+        assertThrows(ParseException.class, () ->
+                ParserUtil.parseLocalDateTime("2023-10-25", "25:00"));
+    }
+
+    @Test
+    public void parseLocalDateTime_invalidDayOfWeek_throwsParseException() {
+        // Invalid day of week
+        assertThrows(ParseException.class, () ->
+                parseLocalDateTime("Funday", "14:30"));
+
+        // Invalid time format with day of week
+        assertThrows(ParseException.class, () ->
+                parseLocalDateTime("Monday", "14:30:00"));
+    }
+
+
+
 }

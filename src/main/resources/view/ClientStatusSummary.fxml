@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.HBox?>
+
+<HBox fx:id="placeHolder" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+      spacing="25" alignment="CENTER">
+    <Label fx:id="titleSummary" text="Progress:"
+           styleClass="client-status-label-summary" style="-fx-font-size: 14px"/>
+    <Label fx:id="startSummary" styleClass="client-status-label-summary" style="-fx-background-color: #D32F2F"/>
+    <Label fx:id="midSummary" styleClass="client-status-label-summary" style= "-fx-background-color: #D97930"/>
+    <Label fx:id="endSummary" styleClass="client-status-label-summary" style="-fx-background-color: #1FAB2F"/>
+</HBox>

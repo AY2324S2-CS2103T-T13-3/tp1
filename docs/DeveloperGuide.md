@@ -4,7 +4,7 @@
   pageNav: 3
 ---
 
-# Insura-Connect Developer Guide
+# InsuraConnect Developer Guide
 
 <!-- * Table of Contents -->
 <page-nav-print />
@@ -107,6 +107,10 @@ How the `Logic` component works:
    Note that although this is shown as a single step in the diagram above (for simplicity), in the code it can take several interactions (between the command object and the `Model`) to achieve.
 1. The result of the command execution is encapsulated as a `CommandResult` object which is returned back from `Logic`.
 
+The sequence diagram below illustrates the interactions within the `Logic` component, taking `execute("policy 1 po/Policy XYZ")` API call as an example.
+
+<puml src="diagrams/PolicySequenceDiagram.puml" alt="Interactions Inside the Logic Component for the `policy 1 po/Policy XYZ` Command" />
+
 Here are the other classes in `Logic` (omitted from the class diagram above) that are used for parsing a user command:
 
 <puml src="diagrams/ParserClasses.puml" width="600"/>
@@ -158,11 +162,11 @@ Classes used by multiple components are in the `seedu.addressbook.commons` packa
 
 This section describes some noteworthy details on how certain features are implemented.
 
-### \[Proposed\] Undo/redo feature
+### Undo/redo feature
 
-#### Proposed Implementation
+#### Implementation
 
-The proposed undo/redo mechanism is facilitated by `VersionedAddressBook`. It extends `AddressBook` with an undo/redo history, stored internally as an `addressBookStateList` and `currentStatePointer`. Additionally, it implements the following operations:
+The undo/redo mechanism is facilitated by `VersionedAddressBook`. It extends `AddressBook` with an undo/redo history, stored internally as an `addressBookStateList` and `currentStatePointer`. Additionally, it implements the following operations:
 
 * `VersionedAddressBook#commit()` — Saves the current address book state in its history.
 * `VersionedAddressBook#undo()` — Restores the previous address book state from its history.
@@ -212,6 +216,10 @@ The following sequence diagram shows how an undo operation goes through the `Log
 
 </box>
 
+The following sequence diagram shows how a redo operation goes through the `Logic` component instead:
+
+<puml src="diagrams/RedoSequenceDiagram-Logic.puml" alt="Interactions Inside the Logic Component for the `redo` Command" />
+
 Similarly, how an undo operation goes through the `Model` component is shown below:
 
 <puml src="diagrams/UndoSequenceDiagram-Model.puml" alt="UndoSequenceDiagram-Model" />
@@ -235,6 +243,8 @@ Step 6. The user executes `clear`, which calls `Model#commitAddressBook()`. Sinc
 The following activity diagram summarizes what happens when a user executes a new command:
 
 <puml src="diagrams/CommitActivityDiagram.puml" width="250" />
+
+
 
 #### Design considerations:
 
@@ -274,13 +284,16 @@ _{Explain here how the data archiving feature will be implemented}_
 
 **Target user profile**:
 
+* insurance agents
 * has a need to manage a significant number of contacts
+* needs to differentiate between different types of contacts
+* track the status of contacts
 * prefer desktop apps over other types
 * can type fast
 * prefers typing to mouse interactions
 * is reasonably comfortable using CLI apps
 
-**Value proposition**: manage contacts faster than a typical mouse/GUI driven app
+**Value proposition**: Provides fast access to client contact details, easily manage client relationships, collaborate with industry partners, and stay organised in a fast-paced industry.
 
 
 ### User stories
@@ -382,6 +395,69 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 
   Use case ends.
 
+**Use case: Add a new person**
+
+**MSS**
+
+1.  User requests to add a new person.
+2.  AddressBook prompts the user to enter the details of the person.
+3. User enters the details of the person.
+4. AddressBook adds the new person to the list.
+
+   Use case ends.
+
+**Extensions**
+
+* 3a. The user enters invalid details.
+
+    * 3a1. AddressBook shows an error message.
+    * 3a2. AddressBook prompts the user to enter the details again.
+    
+  Use case resumes at step 3.
+
+**Use case: Update a person's details**
+
+**MSS**
+
+1.  User requests to list persons..
+2.  AddressBook shows a list of persons.
+3. User requests to update the details of a specific person in the list.
+4. AddressBook prompts the user to enter the new details.
+5. User enters the new details.
+6. AddressBook updates the person's details.
+
+   Use case ends.
+
+**Extensions**
+
+* 2a. The list is empty.
+
+  Use case ends.
+
+* 3a. The given index is invalid..
+
+    * 3a1. AddressBook shows an error message.
+  
+      Use case resumes at step 2.
+
+* 5a. The user enters invalid details.
+
+    * 5a1. AddressBook shows an error message.
+    * 5a2. AddressBook prompts the user to enter the details again.
+      
+  Use case resumes at step 4.
+  
+**Use case: Clear AddressBook**
+
+**MSS**
+
+1. User requests to clear the AddressBook
+2. AddressBook shows the empty AddressBook
+
+    use case ends
+
+
+
 ### Non-Functional Requirements
 
 1.  Should work on any _mainstream OS_ as long as it has Java `11` or above installed.
@@ -390,6 +466,10 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 4. The response to any use action should become visible within 5 seconds.
 5. Should have a user-friendly interface that is easy to navigate and understand.
 6. Should be stable and not crash or lose data under normal use.
+7. Should be able to handle increasing amounts of data and users without significant degradation in performance (Scalability).
+8. Should protect sensitive data and prevent unauthorized access, ensuring data integrity and confidentiality (Security).
+9. Should be easy to maintain, with clear documentation and a modular design that allows for easy updates and fixes .
+10. Should be accessible to users with disabilities, following guidelines such as the Web Content Accessibility Guidelines (WCAG).
 
 
 *{More to be added}*

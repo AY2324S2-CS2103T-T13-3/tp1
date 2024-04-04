@@ -5,6 +5,8 @@ import java.util.function.Predicate;
 
 import javafx.collections.ObservableList;
 import seedu.address.commons.core.GuiSettings;
+import seedu.address.model.person.ClientStatusSummaryValues;
+import seedu.address.model.person.Meeting;
 import seedu.address.model.person.Person;
 
 /**
@@ -76,6 +78,9 @@ public interface Model {
      */
     void setPerson(Person target, Person editedPerson);
 
+    /** Returns the client status summary values for the person list */
+    ClientStatusSummaryValues getClientStatusSummaryValues();
+
     /** Returns an unmodifiable view of the filtered person list */
     ObservableList<Person> getFilteredPersonList();
 
@@ -84,4 +89,47 @@ public interface Model {
      * @throws NullPointerException if {@code predicate} is null.
      */
     void updateFilteredPersonList(Predicate<Person> predicate);
+
+    /**
+     * Returns true if the model has previous address book states to restore.
+     */
+    boolean canUndoAddressBook();
+
+    /**
+     * Returns true if the model has undone address book states to restore.
+     */
+    boolean canRedoAddressBook();
+
+    /**
+     * Restores the model's address book to its previous state.
+     */
+    void undoAddressBook();
+
+    /**
+     * Restores the model's address book to its previously undone state.
+     */
+    void redoAddressBook();
+
+    /**
+     * Saves the current address book state for undo/redo.
+     * Execute this function whenever there's changes to the address book
+     * during the execution of the various commands
+     */
+    void commitAddressBook();
+
+    /**
+     * Checks if the given meeting overlaps with any existing meetings across all persons in the address book.
+     * @param meeting The meeting to check.
+     * @return true if there is an overlap, false otherwise.
+     */
+    boolean hasMeetingOverlap(Meeting meeting);
+
+
+    /**
+     * Removes expired meetings from all persons in the address book.
+     */
+    void removeExpiredMeetings();
+
+
+
 }

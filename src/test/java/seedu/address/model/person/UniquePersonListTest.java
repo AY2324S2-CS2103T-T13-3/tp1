@@ -169,6 +169,14 @@ public class UniquePersonListTest {
     }
 
     @Test
+    public void getClientStatusSummaryValues() {
+        uniquePersonList.add(ALICE);
+        uniquePersonList.add(BOB);
+        assertEquals(uniquePersonList.getClientStatusSummaryValues(),
+                new ClientStatusSummaryValues(1, 1, 0, 0));
+    }
+
+    @Test
     public void toStringMethod() {
         assertEquals(uniquePersonList.asUnmodifiableObservableList().toString(), uniquePersonList.toString());
     }
